@@ -1,5 +1,1 @@
-{
-    "model_name": "LinearRegression",
-    "rmse": 28.946399723788677,
-    "trained_at": "2026-02-07 14:42:50"
-}
+{"model_name": "LinearRegression", "rmse": 29.20446154175442, "trained_at": "2026-02-08 13:07:45.500827", "version": 1}

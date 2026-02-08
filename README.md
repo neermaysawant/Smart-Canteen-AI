@@ -1,64 +1,64 @@
-# 🍽️ Smart Canteen AI – Demand Prediction System
+# 🍽️ Smart Canteen AI — Demand Prediction System
 
-## 📌 Overview
+## 📌 Project Overview
 
-Smart Canteen AI is a machine learning-powered system designed to predict food demand in a university canteen environment. The goal of this project is to transform a traditional ML model into a usable, maintainable, and production-ready application.
+Smart Canteen AI is a production-style machine learning deployment project designed to predict food demand in a university canteen environment.
 
-Instead of existing only in notebooks, the trained model is integrated into a fully interactive dashboard where users can:
+The system transforms traditional notebook-based ML workflows into a fully engineered application including:
 
-- Select daily menu configurations
-- Predict expected food consumption
-- Record actual consumption data
-- Maintain a lifecycle-aware ML system with retraining indicators
+- SQL-based data storage
+- Automated model training pipeline
+- Versioned model lifecycle
+- Interactive prediction dashboard
+- Real-time analytics visualization
+- Human feedback loop for continuous improvement
 
-This project demonstrates real-world ML engineering principles including data pipelines, model deployment, UI interaction, and lifecycle management.
+The focus of this project is not only model performance but also usability, deployment engineering, and lifecycle maintenance.
 
 ---
 
 ## 🎯 Problem Statement
 
-University canteens often struggle with:
+University canteens frequently face challenges such as:
 
-- Food wastage due to over-preparation
-- Food shortages due to underestimation
-- Lack of data-driven planning
+- Over-preparation leading to food waste
+- Under-preparation causing shortages
+- Lack of data-driven decision-making
 
-This system predicts the number of plates consumed based on:
+This project predicts the number of plates consumed based on:
 
 - Day of the week
 - Meal category (Breakfast / Lunch / Dinner)
 - Menu composition
 - Exam period indicator
 
-The aim is to support smarter planning and resource optimization.
+The goal is to assist canteen staff in planning resources efficiently using predictive analytics.
 
 ---
 
 ## 📊 Dataset
 
-The dataset is synthetically generated using realistic Indian university canteen logic.
+The dataset is synthetically generated to simulate real-world Indian university canteen operations.
 
 ### Menu Structure
 
 #### Breakfast
-- Single-item meal selection.
+- Single-item meal.
 
 #### Lunch
-- 1 gravy vegetable
 - 1 dry vegetable
+- 1 gravy vegetable
 - Rice
 - Dal
 - Indian bread
 - Beverage
 
 #### Dinner
-- Veg days: 1 gravy veg + rice + dal + bread
-- Wednesday & Sunday: Chicken gravy + Paneer gravy + rice + dal + bread
-- Friday: Egg gravy + Paneer gravy + rice + dal + bread
+- Monday/Tuesday/Thursday/Saturday: Veg gravy + rice + dal + bread
+- Wednesday/Sunday: Chicken gravy + paneer gravy + rice + dal + bread
+- Friday: Egg gravy + paneer gravy + rice + dal + bread
 
-Additional randomness is introduced to simulate realistic variation.
-
-Data is stored in an SQLite database:
+Data is stored in:
 
 database/canteen.db
 
@@ -66,7 +66,7 @@ database/canteen.db
 
 ## 🤖 Model Implementation
 
-Traditional ML models were used (Neural Networks excluded as per requirement):
+Traditional ML models were used:
 
 - Linear Regression
 - Decision Tree Regressor
@@ -75,76 +75,92 @@ Traditional ML models were used (Neural Networks excluded as per requirement):
 ### Pipeline Steps
 
 1. Load data from SQL database.
-2. Feature encoding using OneHotEncoder.
+2. Encode categorical variables using OneHotEncoder.
 3. Train multiple models.
 4. Evaluate using RMSE.
-5. Select best-performing model automatically.
-6. Serialize trained pipeline.
+5. Automatically select best-performing model.
+6. Save trained model with versioning.
 
-Saved files:
+---
+
+## 🔁 Model Versioning and Lifecycle
+
+Every retraining creates a new version:
 
 models/model_v1.pkl  
-models/model_v1_metadata.json
+models/model_v2.pkl  
+models/model_v3.pkl  
+
+Each model includes metadata:
+
+- Model name
+- RMSE score
+- Training timestamp
+- Version number
+
+The dashboard automatically loads the latest model.
 
 ---
 
-## 🖥️ Dashboard
+## 🖥️ Dashboard Features
 
-The Streamlit dashboard provides:
+Built using Streamlit.
 
-- Interactive menu selection UI.
-- Dynamic input fields based on meal category.
-- Real-time demand prediction.
-- Model information panel showing:
-  - Model name
-  - RMSE score
-  - Training timestamp
+### 🔮 Prediction Page
 
-### User Workflow
+- Dynamic menu selection UI
+- Demand prediction using trained model
+- Actual plates input
+- Database update functionality
+- Retraining alert after threshold updates
 
-1. Select day and category.
-2. Configure menu using dropdowns.
-3. Predict required plates.
-4. Enter actual plates consumed.
-5. Update database with new observations.
+### 📊 Analytics Dashboard
+
+- KPI Cards:
+  - Total records
+  - Average demand
+  - Peak demand
+- Interactive charts:
+  - Demand by category
+  - Weekly trends
+
+### 🤖 Model Info
+
+- Model version
+- RMSE score
+- Training timestamp
+- One-click model retraining
 
 ---
 
-## 🔁 Model Lifecycle Management
+## 🔁 Model Maintenance Workflow
 
-The system tracks updates to the dataset.
-
-Every new actual data entry:
-
-- Is saved into the SQL database.
-- Increments update count.
-- Displays retraining indicator.
-
-After 90 updates:
-
-🚨 Model retraining required.
-
-This simulates a production ML lifecycle process.
+1. User predicts demand.
+2. Actual consumption entered after service.
+3. Data saved into SQL database.
+4. Update counter increases.
+5. System indicates when retraining is required.
+6. Retraining generates new model version.
 
 ---
 
 ## 📁 Project Structure
 
-project_root/
+canteen_project/
 
 dashboard/
-  app.py
+    app.py
 
 database/
-  canteen.db
+    canteen.db
 
 models/
-  model_v1.pkl
-  model_v1_metadata.json
+    model_v1.pkl
+    model_v1_metadata.json
 
 scripts/
-  generate_data.py
-  train_model.py
+    train_model.py
+    generate_data.py
 
 README.md
 
@@ -154,7 +170,7 @@ README.md
 
 Install dependencies:
 
-pip install streamlit pandas scikit-learn
+pip install streamlit pandas scikit-learn plotly
 
 ---
 
@@ -164,15 +180,27 @@ streamlit run dashboard/app.py
 
 ---
 
-## 📈 Future Improvements
+## 🔄 Retraining
 
-- Automatic retraining from dashboard
-- Model version history tracking
-- Live analytics charts
-- Multi-model comparison UI
+Retraining can be triggered directly from the dashboard using:
+
+🚀 Retrain Model
+
+This creates a new versioned model automatically.
+
+---
+
+## 🚀 Engineering Highlights
+
+- SQL-based data pipeline
+- Model versioning
+- Automated lifecycle workflow
+- Interactive UI
+- Analytics dashboard
+- Production-style ML deployment
 
 ---
 
 ## 👨‍💻 Author
 
-Developed as part of Hackathon 3 focusing on ML deployment and lifecycle engineering.
+Developed as part of Hackathon 3 focusing on machine learning deployment and lifecycle engineering.
