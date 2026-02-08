@@ -238,19 +238,28 @@ if page == "🔮 Prediction":
 
 if page == "📊 Analytics Dashboard":
 
-    st.subheader("📊 Canteen Analytics")
+    st.subheader("📊 Analytics Dashboard")
 
-    conn = sqlite3.connect(db_path)
-    df = pd.read_sql_query("SELECT * FROM canteen_data", conn)
+    conn=sqlite3.connect(db_path)
+    df=pd.read_sql_query("SELECT * FROM canteen_data",conn)
     conn.close()
 
-    k1,k2,k3 = st.columns(3)
-    k1.metric("Total Records", len(df))
-    k2.metric("Average Plates", int(df["plates_consumed"].mean()))
-    k3.metric("Peak Demand", int(df["plates_consumed"].max()))
+    k1,k2,k3=st.columns(3)
 
-    fig1 = px.bar(df.groupby("category", as_index=False)["plates_consumed"].mean(),
-                  x="category", y="plates_consumed", color="category",
-                  title="Demand by Category")
+    k1.metric("Records",len(df))
+    k2.metric("Average Plates",int(df["plates_consumed"].mean()))
+    k3.metric("Peak Demand",int(df["plates_consumed"].max()))
 
-    st.plotly_chart(fig1, use_container_width=True)
+    col1,col2=st.columns(2)
+
+    with col1:
+        fig1=px.bar(df.groupby("category",as_index=False)["plates_consumed"].mean(),
+                    x="category",y="plates_consumed",color="category",
+                    title="Demand by Category")
+        st.plotly_chart(fig1,use_container_width=True)
+
+    with col2:
+        fig2=px.line(df.groupby("day_of_week",as_index=False)["plates_consumed"].mean(),
+                     x="day_of_week",y="plates_consumed",markers=True,
+                     title="Weekly Trend")
+        st.plotly_chart(fig2,use_container_width=True)
