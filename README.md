@@ -59,3 +59,120 @@ The dataset is synthetically generated using realistic Indian university canteen
 Additional randomness is introduced to simulate realistic variation.
 
 Data is stored in an SQLite database:
+
+database/canteen.db
+
+---
+
+## 🤖 Model Implementation
+
+Traditional ML models were used (Neural Networks excluded as per requirement):
+
+- Linear Regression
+- Decision Tree Regressor
+- Random Forest Regressor
+
+### Pipeline Steps
+
+1. Load data from SQL database.
+2. Feature encoding using OneHotEncoder.
+3. Train multiple models.
+4. Evaluate using RMSE.
+5. Select best-performing model automatically.
+6. Serialize trained pipeline.
+
+Saved files:
+
+models/model_v1.pkl  
+models/model_v1_metadata.json
+
+---
+
+## 🖥️ Dashboard
+
+The Streamlit dashboard provides:
+
+- Interactive menu selection UI.
+- Dynamic input fields based on meal category.
+- Real-time demand prediction.
+- Model information panel showing:
+  - Model name
+  - RMSE score
+  - Training timestamp
+
+### User Workflow
+
+1. Select day and category.
+2. Configure menu using dropdowns.
+3. Predict required plates.
+4. Enter actual plates consumed.
+5. Update database with new observations.
+
+---
+
+## 🔁 Model Lifecycle Management
+
+The system tracks updates to the dataset.
+
+Every new actual data entry:
+
+- Is saved into the SQL database.
+- Increments update count.
+- Displays retraining indicator.
+
+After 90 updates:
+
+🚨 Model retraining required.
+
+This simulates a production ML lifecycle process.
+
+---
+
+## 📁 Project Structure
+
+project_root/
+
+dashboard/
+  app.py
+
+database/
+  canteen.db
+
+models/
+  model_v1.pkl
+  model_v1_metadata.json
+
+scripts/
+  generate_data.py
+  train_model.py
+
+README.md
+
+---
+
+## ⚙️ Installation
+
+Install dependencies:
+
+pip install streamlit pandas scikit-learn
+
+---
+
+## ▶️ Run Dashboard
+
+streamlit run dashboard/app.py
+
+---
+
+## 📈 Future Improvements
+
+- Automatic retraining from dashboard
+- Model version history tracking
+- Live analytics charts
+- Multi-model comparison UI
+
+---
+
+## 👨‍💻 Author
+
+Developed as part of Hackathon 3 focusing on ML deployment and lifecycle engineering.
