@@ -47,23 +47,33 @@ page = st.sidebar.radio(
 )
 
 
-# MENU
+# Menu Components
+
 
 days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
-breakfast_items = ["Idli","Medu Vada","Poha","Upma","Masala Dosa","Plain Dosa","Aloo Paratha","Paneer Paratha"]
+# Breakfast options (1 item only)
+breakfast_items = ["Idli","Medu Vada","Poha","Upma","Masala Dosa","Plain Dosa","Aloo Paratha","Paneer Paratha","Vegetable Sandwich","Pav Bhaji","Sabudana Khichdi","Sheera","Uttapam"]
 
-dry_veg = ["Bhindi Fry","Aloo Gobi","Beans Poriyal","Cabbage Sabzi"]
-gravy_veg = ["Mixed Veg Curry","Chana Masala","Veg Kofta","Malai Kofta"]
-rice_items = ["Jeera Rice","Plain Rice","Veg Pulao"]
-dal_items = ["Dal Tadka","Sambar","Dal Fry"]
-indian_bread = ["Roti","Chapati","Naan"]
-beverages = ["Curd","Lassi","Buttermilk"]
+# Lunch components (always same structure)
+dry_veg = ["Bhindi Fry","Aloo Gobi","Beans Poriyal","Cabbage Sabzi","Aloo Methi","Tinda Masala","Gajar Matar","Baingan Bharta Dry","Karela Fry"]
+gravy_veg = ["Mixed Veg Curry","Chana Masala","Veg Kofta","Malai Kofta","Rajma Masala","Kadhi Pakoda","Aloo Dum","Mushroom Masala","Navratan Korma","Vegetable Kurma"]
+rice_items = ["Jeera Rice","Plain Rice","Veg Pulao","Peas Pulao","Lemon Rice","Curd Rice","Tomato Rice"]
+dal_items = ["Dal Tadka","Sambar","Dal Fry","Moong Dal","Dal Makhani","Gujarati Dal"]
+indian_bread = ["Roti","Chapati","Naan","Tandoori Roti","Phulka"]
+beverages = ["Curd","Tang","Lemonade","Lassi","Buttermilk","Jaljeera","Rose Milk"]
 
-paneer_gravies = ["Paneer Butter Masala","Shahi Paneer","Kadai Paneer"]
-chicken_gravies = ["Chicken Curry","Butter Chicken","Chicken Kadai"]
-egg_gravies = ["Egg Curry","Anda Masala","Egg Korma"]
+# Paneer gravies
+paneer_gravies = ["Paneer Butter Masala","Shahi Paneer","Kadai Paneer","Palak Paneer","Matar Paneer","Paneer Lababdar","Paneer Do Pyaza","Paneer Tikka Masala"]
 
+# Chicken gravies (Wed & Sun)
+chicken_gravies = ["Chicken Curry","Butter Chicken","Chicken Masala","Chicken Do Pyaza","Chicken Kolhapuri","Chicken Handi","Chicken Kadai"]
+
+# Egg gravies (Friday)
+egg_gravies = ["Egg Curry","Anda Masala","Egg Bhurji Gravy","Egg Korma","Masala Egg Curry"]
+
+# sweets (3 times/week approx)
+sweets = ["Gulab Jamun","Kheer","Halwa","Rasmalai","Jalebi","Sheera","Rice Kheer","Moong Dal Halwa"]
 
 # Model Info Page
 
@@ -162,8 +172,9 @@ if page == "🔮 Prediction":
         rice = st.selectbox("Rice", rice_items)
         dal = st.selectbox("Dal", dal_items)
         bread = st.selectbox("Bread", indian_bread)
+        sweet = st.selectbox("Sweet Dish", sweets)
 
-        menu_item += f" + {rice} + {dal} + {bread}"
+        menu_item += f" + {rice} + {dal} + {bread} + {sweet}"
 
 
     st.success(f"Selected Menu: {menu_item}")
