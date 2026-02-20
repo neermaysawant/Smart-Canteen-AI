@@ -10,9 +10,46 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
-from sklearn.linear_model import LinearRegression
+# Linear Models
+from sklearn.linear_model import (
+    LinearRegression,
+    Ridge,
+    Lasso,
+    ElasticNet,
+    BayesianRidge,
+    HuberRegressor,
+    SGDRegressor,
+    PassiveAggressiveRegressor
+)
+
+# Tree Models
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
+
+# Ensemble Models
+from sklearn.ensemble import (
+    RandomForestRegressor,
+    ExtraTreesRegressor,
+    GradientBoostingRegressor,
+    HistGradientBoostingRegressor,
+    AdaBoostRegressor
+)
+
+# Support Vector Models
+from sklearn.svm import SVR, LinearSVR
+
+# Neighbors
+from sklearn.neighbors import KNeighborsRegressor
+
+# Kernel Methods
+from sklearn.kernel_ridge import KernelRidge
+
+# Gaussian Process
+from sklearn.gaussian_process import GaussianProcessRegressor
+
+# External Industry Models (install required)
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
+from catboost import CatBoostRegressor
 
 from sklearn.metrics import mean_squared_error
 
@@ -59,7 +96,7 @@ categorical_features = ["day_of_week", "category", "menu_item"]
 
 preprocessor = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), categorical_features)
     ],
     remainder="passthrough"
 )
@@ -68,9 +105,44 @@ preprocessor = ColumnTransformer(
 # Model Names
 
 models = {
+
+    # Linear Models
     "LinearRegression": LinearRegression(),
+    "Ridge": Ridge(),
+    "Lasso": Lasso(),
+    "ElasticNet": ElasticNet(),
+    "BayesianRidge": BayesianRidge(),
+    "HuberRegressor": HuberRegressor(),
+    "SGDRegressor": SGDRegressor(),
+    "PassiveAggressiveRegressor": PassiveAggressiveRegressor(),
+
+    # Tree-Based Models
     "DecisionTree": DecisionTreeRegressor(random_state=42),
-    "RandomForest": RandomForestRegressor(random_state=42)
+
+    # Ensemble Tree Models
+    "RandomForest": RandomForestRegressor(random_state=42),
+    "ExtraTrees": ExtraTreesRegressor(random_state=42),
+    "GradientBoosting": GradientBoostingRegressor(random_state=42),
+    "HistGradientBoosting": HistGradientBoostingRegressor(random_state=42),
+    "AdaBoost": AdaBoostRegressor(random_state=42),
+
+    # Support Vector
+    "SVR": SVR(),
+    "LinearSVR": LinearSVR(),
+
+    # Neighbors
+    "KNN": KNeighborsRegressor(),
+
+    # Kernel Methods
+    "KernelRidge": KernelRidge(),
+
+    # Gaussian Process
+    "GaussianProcess": GaussianProcessRegressor(),
+
+    # Industry Boosting Libraries
+    "XGBoost": XGBRegressor(random_state=42, verbosity=0),
+    "LightGBM": LGBMRegressor(random_state=42),
+    "CatBoost": CatBoostRegressor(verbose=0, random_state=42)
 }
 
 
