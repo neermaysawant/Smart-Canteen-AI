@@ -205,13 +205,15 @@ with open(model_path, "wb") as f:
     pickle.dump(best_model, f)
 
 
-# Metadata saving
+# Convert results list into dictionary
+all_models_performance = {name: float(rmse) for name, rmse in results}
 
 metadata = {
     "model_name": best_name,
     "rmse": float(best_rmse),
     "trained_at": str(pd.Timestamp.now()),
     "version": version,
+    "all_models_performance": all_models_performance
 }
 
 with open(metadata_path, "w") as f:
