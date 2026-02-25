@@ -1,206 +1,230 @@
-# 🍽️ Smart Canteen AI — Demand Prediction System
-
-## 📌 Project Overview
-
-Smart Canteen AI is a production-style machine learning deployment project designed to predict food demand in a university canteen environment.
-
-The system transforms traditional notebook-based ML workflows into a fully engineered application including:
-
-- SQL-based data storage
-- Automated model training pipeline
-- Versioned model lifecycle
-- Interactive prediction dashboard
-- Real-time analytics visualization
-- Human feedback loop for continuous improvement
-
-The focus of this project is not only model performance but also usability, deployment engineering, and lifecycle maintenance.
+# CANTEENIQ · Intelligence Platform
+### University Canteen · Demand Forecasting System
 
 ---
 
-## 🎯 Problem Statement
+```
+  ██████╗ █████╗ ███╗   ██╗████████╗███████╗███████╗███╗   ██╗██╗ ██████╗
+ ██╔════╝██╔══██╗████╗  ██║╚══██╔══╝██╔════╝██╔════╝████╗  ██║██║██╔═══██╗
+ ██║     ███████║██╔██╗ ██║   ██║   █████╗  █████╗  ██╔██╗ ██║██║██║   ██║
+ ██║     ██╔══██║██║╚██╗██║   ██║   ██╔══╝  ██╔══╝  ██║╚██╗██║██║██║▄▄ ██║
+ ╚██████╗██║  ██║██║ ╚████║   ██║   ███████╗███████╗██║ ╚████║██║╚██████╔╝
+  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝╚═╝  ╚═══╝╚═╝ ╚══▀▀═╝
+```
 
-University canteens frequently face challenges such as:
-
-- Over-preparation leading to food waste
-- Under-preparation causing shortages
-- Lack of data-driven decision-making
-
-This project predicts the number of plates consumed based on:
-
-- Day of the week
-- Meal category (Breakfast / Lunch / Dinner)
-- Menu composition
-- Exam period indicator
-
-The goal is to assist canteen staff in planning resources efficiently using predictive analytics.
+> **Production-style ML deployment** · 22 models evaluated · Auto-versioned · Live feedback loop
 
 ---
 
-## 📊 Dataset
+## What is this?
 
-The dataset is synthetically generated to simulate real-world Indian university canteen operations.
+CanteenIQ is a machine learning deployment project built for a university canteen environment. It solves a real operational problem — canteen staff have no reliable way to know how much food to prepare each day, leading to waste when they overprepare and shortages when they underprepare.
 
-### Menu Structure
+The system predicts the number of plates that will be consumed for any given meal service, based on the day of the week, meal category, menu composition, and whether it's an exam period. Staff can enter the actual plates served after each meal, which feeds back into the model's training data. When enough new data accumulates, the model retrains automatically into a new versioned file.
 
-#### Breakfast
-- Single-item meal.
-
-#### Lunch
-- 1 dry vegetable
-- 1 gravy vegetable
-- Rice
-- Dal
-- Indian bread
-- Beverage
-
-#### Dinner
-- Monday/Tuesday/Thursday/Saturday: Veg gravy + rice + dal + bread
-- Wednesday/Sunday: Chicken gravy + paneer gravy + rice + dal + bread
-- Friday: Egg gravy + paneer gravy + rice + dal + bread
-
-Data is stored in:
-
-database/canteen.db
+The focus here is not just on model accuracy — it's on the full deployment lifecycle: data storage, training pipelines, versioning, a usable interface, and a maintenance plan.
 
 ---
 
-## 🤖 Model Implementation
+## The Problem
 
-Traditional ML models were used:
+University canteens consistently face three pain points:
 
-- Linear Regression
-- Decision Tree Regressor
-- Random Forest Regressor
+- **Overpreparation** → food waste, higher costs
+- **Underpreparation** → student dissatisfaction, shortages
+- **No feedback mechanism** → decisions made on gut feel, not data
 
-### Pipeline Steps
-
-1. Load data from SQL database.
-2. Encode categorical variables using OneHotEncoder.
-3. Train multiple models.
-4. Evaluate using RMSE.
-5. Automatically select best-performing model.
-6. Save trained model with versioning.
+CanteenIQ addresses all three by turning historical consumption data into forward-looking predictions, and by continuously improving those predictions as more real-world data is collected.
 
 ---
 
-## 🔁 Model Versioning and Lifecycle
+## Features
 
-Every retraining creates a new version:
+### Operations Hub
+The main working screen for canteen staff. Two panels side by side:
 
-models/model_v1.pkl  
-models/model_v2.pkl  
-models/model_v3.pkl  
+**Left — Demand Forecast**
+Select the day, meal category, exam status, and build the menu using dropdowns that reflect the actual canteen menu structure (different options for Breakfast, Lunch, and each dinner type by day). Hit **Run Forecast** to get a predicted plate count with a % delta against the category average. After service, enter the actual plates served and commit it to the database. A progress bar shows how close you are to the next retrain threshold.
 
-Each model includes metadata:
+**Right — Live Analytics**
+Eight interactive charts that update in real time as the database grows:
+- Weekly demand radar (normal vs exam overlay)
+- Stacked area chart by category across days
+- Utilisation vs peak capacity bullet bars
+- Violin distribution per meal category
+- Weekly volume waterfall
+- Sankey flow diagram (Day → Category → Volume tier)
+- Menu demand treemap (top 20 items)
+- Rolling average sparklines per category
+- Strip plot of individual records with exam/normal split
 
-- Model name
-- RMSE score
-- Training timestamp
-- Version number
-
-The dashboard automatically loads the latest model.
-
----
-
-## 🖥️ Dashboard Features
-
-Built using Streamlit.
-
-### 🔮 Prediction Page
-
-- Dynamic menu selection UI
-- Demand prediction using trained model
-- Actual plates input
-- Database update functionality
-- Retraining alert after threshold updates
-
-### 📊 Analytics Dashboard
-
-- KPI Cards:
-  - Total records
-  - Average demand
-  - Peak demand
-- Interactive charts:
-  - Demand by category
-  - Weekly trends
-
-### 🤖 Model Info
-
-- Model version
-- RMSE score
-- Training timestamp
-- One-click model retraining
+### Model Intelligence
+The technical view. Shows every model that was evaluated in the last training run with a ranked leaderboard, RMSE scores, performance gap vs the best model, and a normalised 0–100 score. Includes a radar chart for the top 8, a scatter plot of RMSE vs score, and a one-click retrain button that runs the full training pipeline and saves a new versioned model.
 
 ---
 
-## 🔁 Model Maintenance Workflow
+## Models
 
-1. User predicts demand.
-2. Actual consumption entered after service.
-3. Data saved into SQL database.
-4. Update counter increases.
-5. System indicates when retraining is required.
-6. Retraining generates new model version.
+22 models are trained and evaluated on every run. The best performer is automatically selected and saved.
+
+| Tier | Models |
+|------|--------|
+| Linear | LinearRegression, Ridge, Lasso, ElasticNet, BayesianRidge, HuberRegressor, SGDRegressor, PassiveAggressiveRegressor |
+| Tree | DecisionTreeRegressor |
+| Ensemble | RandomForest, ExtraTrees, GradientBoosting, HistGradientBoosting, AdaBoost |
+| Support Vector | SVR, LinearSVR |
+| Neighbors | KNeighborsRegressor |
+| Kernel | KernelRidge |
+| Gaussian | GaussianProcessRegressor |
+| Boosting | XGBoost, LightGBM, **CatBoost** ← current champion |
+
+**Current best:** CatBoost · RMSE 27.43 · v2
+
+Features used: `day_of_week`, `category`, `menu_item`, `is_exam_period`
+Target: `plates_consumed`
+Preprocessing: OneHotEncoder on categorical columns via sklearn Pipeline
+Evaluation: 80/20 train-test split, RMSE
 
 ---
 
-## 📁 Project Structure
+## Dataset
 
+Synthetically generated to simulate an Indian university canteen. 400 base records, growing as staff log actual consumption.
+
+**Menu structure:**
+
+```
+Breakfast   →  Single item (Idli, Dosa, Paratha, etc.)
+
+Lunch       →  Gravy veg + Dry veg + Rice + Dal + Bread + Beverage
+
+Dinner
+  Mon/Tue/Thu/Sat  →  Veg gravy + Rice + Dal + Bread
+  Wed/Sun          →  Chicken gravy + Paneer gravy + Rice + Dal + Bread
+  Fri              →  Egg gravy + Paneer gravy + Rice + Dal + Bread
+  (~33% chance)    →  + Sweet dish
+```
+
+Demand ranges: Breakfast 60–120 · Lunch 120–200 · Dinner 100–180
+Exam period reduces demand by ~15 plates with added noise.
+
+All data lives in `database/canteen.db` (SQLite).
+
+---
+
+## Project Structure
+
+```
 canteen_project/
+│
+├── dashboard/
+│   └── app.py                  ← Streamlit dashboard (Operations Hub + Model Intelligence)
+│
+├── database/
+│   └── canteen.db              ← SQLite database (auto-created, not in repo)
+│
+├── models/
+│   ├── model_v1.pkl            ← Trained pipeline (versioned)
+│   ├── model_v1_metadata.json  ← RMSE, timestamp, all model scores
+│   ├── model_v2.pkl
+│   └── model_v2_metadata.json
+│
+├── scripts/
+│   ├── create_database.py      ← Creates the SQLite schema
+│   ├── generate_data.py        ← Synthesizes and inserts 400 records
+│   ├── train_models.py         ← Trains all 22 models, saves best + metadata
+│   └── predict.py              ← Standalone prediction script (CLI)
+│
+└── README.md
+```
 
-dashboard/
-    app.py
-
-database/
-    canteen.db
-
-models/
-    model_v1.pkl
-    model_v1_metadata.json
-
-scripts/
-    train_model.py
-    generate_data.py
-
-README.md
+> **Note:** `database/canteen.db` and `models/*.pkl` are excluded from the repository. Run the setup steps below to regenerate them locally.
 
 ---
 
-## ⚙️ Installation
+## Setup
 
-Install dependencies:
+**Requirements**
 
-pip install streamlit pandas scikit-learn plotly
+```bash
+pip install streamlit pandas scikit-learn plotly xgboost lightgbm catboost
+```
 
----
+**First-time setup** (run in order)
 
-## ▶️ Run Dashboard
+```bash
+# 1. Create the database schema
+python scripts/create_database.py
 
+# 2. Generate synthetic training data
+python scripts/generate_data.py
+
+# 3. Train all models and save the best one
+python scripts/train_models.py
+
+# 4. Launch the dashboard
 streamlit run dashboard/app.py
+```
 
 ---
 
-## 🔄 Retraining
+## Model Lifecycle
 
-Retraining can be triggered directly from the dashboard using:
+```
+Staff logs prediction + actual
+           │
+           ▼
+    Database updated
+           │
+           ▼
+   Update counter +1
+           │
+    every 42 updates
+           ▼
+  ┌─────────────────┐
+  │  RETRAIN ALERT  │
+  └────────┬────────┘
+           │
+           ▼
+  Run train_models.py
+  (or click Retrain in dashboard)
+           │
+           ▼
+  New model_v{n}.pkl saved
+  Dashboard auto-loads latest
+```
 
-🚀 Retrain Model
-
-This creates a new versioned model automatically.
+The 42-update threshold is configurable in `app.py`. Each retrain evaluates all 22 models fresh and promotes the new best performer.
 
 ---
 
-## 🚀 Engineering Highlights
+## Maintenance Timeline
 
-- SQL-based data pipeline
-- Model versioning
-- Automated lifecycle workflow
-- Interactive UI
-- Analytics dashboard
-- Production-style ML deployment
+| Frequency | Action |
+|-----------|--------|
+| Every service | Log actual plates consumed via dashboard |
+| Every 42 new records | Trigger model retrain |
+| Monthly | Review model RMSE trend; investigate drift if RMSE rises >10% |
+| Semester start | Refresh synthetic data weights if menu changes |
+| Annually | Audit feature relevance; consider adding weather, events data |
 
 ---
 
-## 👨‍💻 Author
+## Tech Stack
 
-Developed as part of Hackathon 3 focusing on machine learning deployment and lifecycle engineering.
+| Layer | Technology |
+|-------|-----------|
+| Dashboard | Streamlit |
+| Visualisation | Plotly (go, px) |
+| ML | scikit-learn, XGBoost, LightGBM, CatBoost |
+| Data | SQLite via Python sqlite3 |
+| Serialisation | pickle + JSON metadata |
+| Language | Python 3.10+ |
+
+---
+
+## Author
+
+**Neermay Sawant**
+
+Developed as part of **Hackathon 3** · Machine Learning Deployment & Lifecycle Engineering
