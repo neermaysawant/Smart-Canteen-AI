@@ -1,8 +1,22 @@
 import sqlite3
 import os
 import random
+import argparse
 
-# Database Connection
+# ── CLI Arguments ──────────────────────────────────────────────────────────────
+# Allows running: python generate_data.py --records 50 --seed 99
+# Default behaviour (no args) is unchanged: 21 records, random seed.
+
+parser = argparse.ArgumentParser(description="Generate synthetic canteen data and insert into the database.")
+parser.add_argument("--records", type=int, default=21, help="Number of records to generate (default: 21)")
+parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducibility (default: random)")
+args = parser.parse_args()
+
+if args.seed is not None:
+    random.seed(args.seed)
+
+
+# ── Database Connection ────────────────────────────────────────────────────────
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
 db_path = os.path.join(base_dir, 'database', 'canteen.db')
@@ -11,115 +25,123 @@ conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
 
-# Menu Components
+# ── Menu Components ────────────────────────────────────────────────────────────
+
+days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+# Breakfast: single item served
+breakfast_items = [
+    "Idli", "Medu Vada", "Poha", "Upma", "Masala Dosa", "Plain Dosa",
+    "Aloo Paratha", "Paneer Paratha", "Vegetable Sandwich", "Pav Bhaji",
+    "Sabudana Khichdi", "Sheera", "Uttapam"
+]
+
+# Lunch: full thali structure
+dry_veg = [
+    "Bhindi Fry", "Aloo Gobi", "Beans Poriyal", "Cabbage Sabzi",
+    "Aloo Methi", "Tinda Masala", "Gajar Matar", "Baingan Bharta Dry", "Karela Fry"
+]
+gravy_veg = [
+    "Mixed Veg Curry", "Chana Masala", "Veg Kofta", "Malai Kofta", "Rajma Masala",
+    "Kadhi Pakoda", "Aloo Dum", "Mushroom Masala", "Navratan Korma", "Vegetable Kurma"
+]
+rice_items = ["Jeera Rice", "Plain Rice", "Veg Pulao", "Peas Pulao", "Lemon Rice", "Curd Rice", "Tomato Rice"]
+dal_items  = ["Dal Tadka", "Sambar", "Dal Fry", "Moong Dal", "Dal Makhani", "Gujarati Dal"]
+indian_bread = ["Roti", "Chapati", "Naan", "Tandoori Roti", "Phulka"]
+beverages  = ["Curd", "Tang", "Lemonade", "Lassi", "Buttermilk", "Jaljeera", "Rose Milk"]
+
+# Dinner proteins (day-dependent)
+paneer_gravies  = [
+    "Paneer Butter Masala", "Shahi Paneer", "Kadai Paneer", "Palak Paneer",
+    "Matar Paneer", "Paneer Lababdar", "Paneer Do Pyaza", "Paneer Tikka Masala"
+]
+chicken_gravies = [
+    "Chicken Curry", "Butter Chicken", "Chicken Masala", "Chicken Do Pyaza",
+    "Chicken Kolhapuri", "Chicken Handi", "Chicken Kadai"
+]
+egg_gravies = ["Egg Curry", "Anda Masala", "Egg Bhurji Gravy", "Egg Korma", "Masala Egg Curry"]
+sweets = [
+    "Gulab Jamun", "Kheer", "Halwa", "Rasmalai", "Jalebi",
+    "Sheera", "Rice Kheer", "Moong Dal Halwa"
+]
 
 
-days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
-
-# Breakfast options (1 item only)
-breakfast_items = ["Idli","Medu Vada","Poha","Upma","Masala Dosa","Plain Dosa","Aloo Paratha","Paneer Paratha","Vegetable Sandwich","Pav Bhaji","Sabudana Khichdi","Sheera","Uttapam"]
-
-# Lunch components (always same structure)
-dry_veg = ["Bhindi Fry","Aloo Gobi","Beans Poriyal","Cabbage Sabzi","Aloo Methi","Tinda Masala","Gajar Matar","Baingan Bharta Dry","Karela Fry"]
-gravy_veg = ["Mixed Veg Curry","Chana Masala","Veg Kofta","Malai Kofta","Rajma Masala","Kadhi Pakoda","Aloo Dum","Mushroom Masala","Navratan Korma","Vegetable Kurma"]
-rice_items = ["Jeera Rice","Plain Rice","Veg Pulao","Peas Pulao","Lemon Rice","Curd Rice","Tomato Rice"]
-dal_items = ["Dal Tadka","Sambar","Dal Fry","Moong Dal","Dal Makhani","Gujarati Dal"]
-indian_bread = ["Roti","Chapati","Naan","Tandoori Roti","Phulka"]
-beverages = ["Curd","Tang","Lemonade","Lassi","Buttermilk","Jaljeera","Rose Milk"]
-
-# Paneer gravies
-paneer_gravies = ["Paneer Butter Masala","Shahi Paneer","Kadai Paneer","Palak Paneer","Matar Paneer","Paneer Lababdar","Paneer Do Pyaza","Paneer Tikka Masala"]
-
-# Chicken gravies (Wed & Sun)
-chicken_gravies = ["Chicken Curry","Butter Chicken","Chicken Masala","Chicken Do Pyaza","Chicken Kolhapuri","Chicken Handi","Chicken Kadai"]
-
-# Egg gravies (Friday)
-egg_gravies = ["Egg Curry","Anda Masala","Egg Bhurji Gravy","Egg Korma","Masala Egg Curry"]
-
-# sweets (3 times/week approx)
-sweets = ["Gulab Jamun","Kheer","Halwa","Rasmalai","Jalebi","Sheera","Rice Kheer","Moong Dal Halwa"]
-
-# Genetrating Fucntions
+# ── Generation Functions ───────────────────────────────────────────────────────
 
 def generate_breakfast():
+    """Single breakfast item. Demand: 60–120 plates."""
     menu_item = random.choice(breakfast_items)
-    demand = random.randint(60,120)
+    demand = random.randint(60, 120)
     return menu_item, demand
 
 
 def generate_lunch():
-
-    dry = random.choice(dry_veg)
-    gravy = random.choice(gravy_veg)
-
-    rice = random.choice(rice_items)
-    dal = random.choice(dal_items)
-    bread = random.choice(indian_bread)
+    """Full thali: gravy + dry + rice + dal + bread + beverage. Demand: 120–200."""
+    gravy    = random.choice(gravy_veg)
+    dry      = random.choice(dry_veg)
+    rice     = random.choice(rice_items)
+    dal      = random.choice(dal_items)
+    bread    = random.choice(indian_bread)
     beverage = random.choice(beverages)
-
-    # primary menu identifier
     menu_item = f"{gravy} + {dry} + {rice} + {dal} + {bread} + {beverage}"
-
-    demand = random.randint(120,200)
-
+    demand = random.randint(120, 200)
     return menu_item, demand
 
 
 def generate_dinner(day):
-
-    # Monday, Tuesday, Thursday, Saturday -> veg gravy
-    if day in ["Monday","Tuesday","Thursday","Saturday"]:
+    """
+    Dinner protein varies by day:
+      Mon/Tue/Thu/Sat → veg gravy only
+      Wed/Sun         → chicken + paneer
+      Fri             → egg + paneer
+    Sweet dish included ~33% of the time across all days.
+    Demand: 100–180 plates.
+    """
+    if day in ["Monday", "Tuesday", "Thursday", "Saturday"]:
         menu_item = random.choice(gravy_veg)
-
-    # Wednesday & Sunday -> chicken + paneer option
-    elif day in ["Wednesday","Sunday"]:
+    elif day in ["Wednesday", "Sunday"]:
         menu_item = f"{random.choice(chicken_gravies)} + {random.choice(paneer_gravies)}"
-
-    # Friday -> egg + paneer option
     elif day == "Friday":
         menu_item = f"{random.choice(egg_gravies)} + {random.choice(paneer_gravies)}"
 
-    # Sweet approx 3 times/week
-    include_sweet = random.choice([True, False, False])
-
-    if include_sweet:
+    # Sweet dish ~33% of the time
+    if random.choice([True, False, False]):
         menu_item += f" + {random.choice(sweets)}"
 
-    rice = random.choice(rice_items)
-    dal = random.choice(dal_items)
+    rice  = random.choice(rice_items)
+    dal   = random.choice(dal_items)
     bread = random.choice(indian_bread)
-
     menu_item += f" + {rice} + {dal} + {bread}"
 
-    demand = random.randint(100,180)
-
+    demand = random.randint(100, 180)
     return menu_item, demand
 
 
-# Data Generation
+# ── Data Generation Loop ───────────────────────────────────────────────────────
 
-records_to_generate = 400
+records_to_generate = args.records
+inserted = 0
+category_counts = {"Breakfast": 0, "Lunch": 0, "Dinner": 0}
 
-for i in range(records_to_generate):
+for _ in range(records_to_generate):
 
-    day = random.choice(days)
-    category = random.choice(["Breakfast","Lunch","Dinner"])
-    exam_period = random.choice([0,1])
+    day      = random.choice(days)
+    category = random.choice(["Breakfast", "Lunch", "Dinner"])
+    exam_period = random.choice([0, 1])
 
     if category == "Breakfast":
         menu_item, base_demand = generate_breakfast()
-
     elif category == "Lunch":
         menu_item, base_demand = generate_lunch()
-
     else:
         menu_item, base_demand = generate_dinner(day)
 
-    # exam period reduces demand slightly
+    # Exam period suppresses demand by ~15 plates (students study off-campus, skip meals)
     if exam_period == 1:
         base_demand -= 15
 
-    plates_consumed = max(20, base_demand + random.randint(-25,25))
+    # Add realistic noise: ±25 plates around the base demand
+    plates_consumed = max(20, base_demand + random.randint(-25, 25))
 
     cursor.execute("""
         INSERT INTO canteen_data(
@@ -131,7 +153,17 @@ for i in range(records_to_generate):
         ) VALUES (?, ?, ?, ?, ?)
     """, (day, category, menu_item, exam_period, plates_consumed))
 
+    inserted += 1
+    category_counts[category] += 1
+
+
 conn.commit()
 conn.close()
 
-print("Structured Indian canteen dataset generated successfully!")
+
+# ── Summary ────────────────────────────────────────────────────────────────────
+
+print(f"Generated {inserted} records successfully.")
+print(f"  Breakdown: Breakfast={category_counts['Breakfast']}  Lunch={category_counts['Lunch']}  Dinner={category_counts['Dinner']}")
+if args.seed is not None:
+    print(f"  Seed used: {args.seed} (reproducible)")
