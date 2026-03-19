@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+import sys
+import io
+# Force stdout to UTF-8 on Windows to prevent charmap encoding errors
+# from ML libraries (LightGBM, CatBoost) that print Unicode characters
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
 import sqlite3
 import os
 import pandas as pd
@@ -54,52 +62,55 @@ from catboost import CatBoostRegressor
 from sklearn.metrics import mean_squared_error
 
 
-# ── Paths ──────────────────────────────────────────────────────────────────────
+# Database and Model Paths
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
+
 db_path = os.path.join(base_dir, 'database', 'canteen.db')
+
 models_dir = os.path.join(base_dir, 'models')
+
 os.makedirs(models_dir, exist_ok=True)
 
 
-# ── Load Data ──────────────────────────────────────────────────────────────────
+# LOAD DATA FROM SQL
 
 conn = sqlite3.connect(db_path)
-df = pd.read_sql_query("SELECT * FROM canteen_data", conn)
-conn.close()
 
+df = pd.read_sql_query("SELECT * FROM canteen_data", conn)
+
+conn.close()
 if df.empty:
     raise ValueError("Database has no data. Run generate_data.py first.")
+print("Data loaded:", df.shape)
 
-print(f"Data loaded: {df.shape[0]} records, {df.shape[1]} columns")
-print(f"  Category breakdown: {df['category'].value_counts().to_dict()}")
-print(f"  Exam period records: {df['is_exam_period'].sum()} / {len(df)}")
-print(f"  Target range: {df['plates_consumed'].min()} – {df['plates_consumed'].max()} plates")
+if df.empty:
+    raise ValueError("Database is empty. Please insert data first.")
 
 
-# ── Features and Target ────────────────────────────────────────────────────────
+# Features and Target
 
 X = df[["day_of_week", "category", "menu_item", "is_exam_period"]]
+
 y = df["plates_consumed"]
+
+
+# categorical columns
 
 categorical_features = ["day_of_week", "category", "menu_item"]
 
 
-# ── Preprocessing Pipeline ─────────────────────────────────────────────────────
-# OneHotEncoder chosen over LabelEncoder because our tree-based and linear
-# models both benefit from explicit binary columns — label encoding would
-# imply a false ordinal relationship between categories like "Monday" < "Friday".
-# handle_unknown="ignore" ensures unseen menu items at inference don't crash.
+# Preprocessing
 
 preprocessor = ColumnTransformer(
     transformers=[
         ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), categorical_features)
     ],
-    remainder="passthrough"   # passes is_exam_period through unchanged
+    remainder="passthrough"
 )
 
 
-# ── Model Registry ─────────────────────────────────────────────────────────────
+# Model Names
 
 models = {
 
@@ -143,24 +154,20 @@ models = {
 }
 
 
-# ── Train / Test Split ─────────────────────────────────────────────────────────
-# 80/20 split gives enough training data for OHE to see all menu combinations
-# while reserving a meaningful holdout for RMSE evaluation.
+# train/test split
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-print(f"\nTrain size: {len(X_train)}  |  Test size: {len(X_test)}")
-print("─" * 48)
-
-
-# ── Train All Models ───────────────────────────────────────────────────────────
 
 best_model = None
 best_rmse = float("inf")
 best_name = ""
+
 results = []
+
+# Model Training and evaluation
 
 for name, model in models.items():
 
@@ -170,15 +177,14 @@ for name, model in models.items():
     ])
 
     pipeline.fit(X_train, y_train)
+
     predictions = pipeline.predict(X_test)
 
-    # RMSE used (not MAE) because it penalises large over/under-preparation
-    # errors more heavily — a 40-plate error is far worse than two 20-plate errors
-    # for canteen operations (wasted food vs. running out mid-service).
     mse = mean_squared_error(y_test, predictions)
     rmse = mse ** 0.5
 
-    print(f"{name:<30} RMSE: {rmse:.4f}")
+    print(f"{name} RMSE:", rmse)
+
     results.append((name, rmse))
 
     if rmse < best_rmse:
@@ -187,42 +193,27 @@ for name, model in models.items():
         best_name = name
 
 
-# ── Version Detection ──────────────────────────────────────────────────────────
+# Model Versioning
 
 existing_models = [
     f for f in os.listdir(models_dir)
     if f.startswith("model_v") and f.endswith(".pkl")
 ]
+
 version = len(existing_models) + 1
 
 model_path = os.path.join(models_dir, f"model_v{version}.pkl")
+
 metadata_path = os.path.join(models_dir, f"model_v{version}_metadata.json")
 
 
-# ── Load Champion History for post-mortem tracking ────────────────────────────
-# Reads all previous metadata files to build a version-by-version champion log.
-# This powers the post-mortem analysis in the dashboard.
-
-champion_history = []
-for v in range(1, version):
-    prev_meta = os.path.join(models_dir, f"model_v{v}_metadata.json")
-    if os.path.exists(prev_meta):
-        with open(prev_meta, "r") as f:
-            prev = json.load(f)
-        champion_history.append({
-            "version": v,
-            "champion": prev.get("model_name", "unknown"),
-            "rmse": prev.get("rmse", None),
-            "trained_at": prev.get("trained_at", ""),
-            "record_count": prev.get("record_count", None)
-        })
-
-
-# ── Save Best Model ────────────────────────────────────────────────────────────
+# Best model saving
 
 with open(model_path, "wb") as f:
     pickle.dump(best_model, f)
 
+
+# Convert results list into dictionary
 all_models_performance = {name: float(rmse) for name, rmse in results}
 
 metadata = {
@@ -230,30 +221,20 @@ metadata = {
     "rmse": float(best_rmse),
     "trained_at": str(pd.Timestamp.now()),
     "version": version,
-    "record_count": len(df),
-    "train_size": len(X_train),
-    "test_size": len(X_test),
-    "features": ["day_of_week", "category", "menu_item", "is_exam_period"],
-    "target": "plates_consumed",
-    "champion_history": champion_history,
     "all_models_performance": all_models_performance
 }
 
 with open(metadata_path, "w") as f:
-    json.dump(metadata, f, indent=2)
+
+    json.dump(metadata, f)
 
 
-# ── Summary ────────────────────────────────────────────────────────────────────
+print("================================")
 
-print("\n" + "=" * 48)
-print(f"  Champion model : {best_name}")
-print(f"  RMSE           : {best_rmse:.4f}")
-print(f"  Version saved  : v{version}")
-print(f"  Records used   : {len(df)}")
-if champion_history:
-    prev_rmse = champion_history[-1]["rmse"]
-    prev_champ = champion_history[-1]["champion"]
-    delta = prev_rmse - best_rmse if prev_rmse else 0
-    direction = "improved" if delta > 0 else "degraded"
-    print(f"  vs v{version-1}          : {prev_champ} RMSE {prev_rmse:.4f} → {direction} by {abs(delta):.4f}")
-print("=" * 48)
+print("Best model:", best_name)
+
+print("RMSE:", best_rmse)
+
+print("Model version saved:", version)
+
+print("================================")
