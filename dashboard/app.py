@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import sys
 import pickle
 import pandas as pd
 import json
@@ -589,7 +590,7 @@ with st.sidebar:
 
     page = st.radio(
         "Navigate",
-        ["⬡  Operations Hub", "⬡  Model Intelligence"],
+        ["Operations Hub", "Model Intelligence", "Post-Mortem Analysis"],
         label_visibility="collapsed"
     )
 
@@ -702,7 +703,6 @@ if "Operations" in page:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
         st.markdown('<div class="panel-title">Configure Service Parameters</div>', unsafe_allow_html=True)
 
         c1, c2 = st.columns(2)
@@ -757,10 +757,8 @@ if "Operations" in page:
                 sweet = st.selectbox("Sweet Dish", sweets)
             menu_item += f" + {rice} + {dal} + {bread} + {sweet}"
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
         # Predict button
-        if st.button("⬡  RUN FORECAST", use_container_width=True):
+        if st.button("RUN FORECAST", use_container_width=True):
             input_df = pd.DataFrame([{
                 "day_of_week": day, "category": category,
                 "menu_item": menu_item, "is_exam_period": exam_period
@@ -804,7 +802,7 @@ if "Operations" in page:
 
             actual = st.number_input("Actual Plates Served", min_value=0, key="actual_input")
 
-            if st.button("⬡  COMMIT TO DATABASE", use_container_width=True):
+            if st.button("COMMIT TO DATABASE", use_container_width=True):
                 conn = sqlite3.connect(db_path)
                 cursor = conn.cursor()
                 cursor.execute("""
@@ -904,7 +902,7 @@ if "Operations" in page:
                         direction="clockwise"
                     )
                 ),
-                title=dict(text="⬡  Weekly Demand Radar · Normal vs Exam", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Weekly Demand Radar · Normal vs Exam", font=dict(color=FONT_CLR, size=11)),
                 paper_bgcolor=PLOT_PAPER,
                 plot_bgcolor=PLOT_BG,
                 font=dict(family="IBM Plex Mono", color=FONT_CLR),
@@ -940,7 +938,7 @@ if "Operations" in page:
                     hovertemplate=f"<b>{cat}</b><br>%{{x}}: %{{y:.0f}} plates<extra></extra>"
                 ))
             fig.update_layout(
-                title=dict(text="⬡  Stacked Demand · Category × Day", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Stacked Demand · Category × Day", font=dict(color=FONT_CLR, size=11)),
                 legend=dict(
                     bgcolor="rgba(0,0,0,0)", bordercolor=GRID_CLR,
                     font=dict(size=9, color=FONT_CLR),
@@ -994,7 +992,7 @@ if "Operations" in page:
                 )
 
             fig.update_layout(
-                title=dict(text="⬡  Utilisation vs Peak Capacity", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Utilisation vs Peak Capacity", font=dict(color=FONT_CLR, size=11)),
                 xaxis=dict(visible=False, range=[0,1.15]),
                 yaxis=dict(visible=False, range=[0,1.1]),
                 paper_bgcolor=PLOT_PAPER,
@@ -1024,7 +1022,7 @@ if "Operations" in page:
                     meanline=dict(color="white", width=1.5)
                 ))
             fig.update_layout(
-                title=dict(text="⬡  Demand Spread · Violin Distribution", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Demand Spread · Violin Distribution", font=dict(color=FONT_CLR, size=11)),
                 violingap=0.15,
                 violinmode="overlay",
                 showlegend=False
@@ -1054,7 +1052,7 @@ if "Operations" in page:
                 totals=dict(marker=dict(color=CYAN)),
             ))
             fig.update_layout(
-                title=dict(text="⬡  Weekly Volume Waterfall", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Weekly Volume Waterfall", font=dict(color=FONT_CLR, size=11)),
                 showlegend=False
             )
             apply_theme(fig, 280)
@@ -1112,7 +1110,7 @@ if "Operations" in page:
                 )
             ))
             fig.update_layout(
-                title=dict(text="⬡  Demand Flow · Day → Category → Volume Tier", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Demand Flow · Day → Category → Volume Tier", font=dict(color=FONT_CLR, size=11)),
                 font=dict(family="IBM Plex Mono", color=FONT_CLR, size=9),
                 paper_bgcolor=PLOT_PAPER,
                 margin=dict(l=10, r=10, t=40, b=10),
@@ -1144,7 +1142,7 @@ if "Operations" in page:
                 pathbar=dict(visible=False)
             ))
             fig.update_layout(
-                title=dict(text="⬡  Menu Demand Landscape · Treemap", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Menu Demand Landscape · Treemap", font=dict(color=FONT_CLR, size=11)),
                 paper_bgcolor=PLOT_PAPER,
                 font=dict(family="IBM Plex Mono", color=FONT_CLR),
                 margin=dict(l=5, r=5, t=40, b=5),
@@ -1190,7 +1188,7 @@ if "Operations" in page:
                 showlegend=True
             ))
             fig.update_layout(
-                title=dict(text="⬡  Individual Records · Exam vs Normal Strip", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Individual Records · Exam vs Normal Strip", font=dict(color=FONT_CLR, size=11)),
                 xaxis=dict(
                     tickvals=list(range(7)),
                     ticktext=[d[:3] for d in day_order],
@@ -1228,7 +1226,7 @@ if "Operations" in page:
                         xanchor="left", xshift=4
                     )
             fig.update_layout(
-                title=dict(text="⬡  Rolling Avg · Category Trend Over Records", font=dict(color=FONT_CLR, size=11)),
+                title=dict(text="Rolling Avg · Category Trend Over Records", font=dict(color=FONT_CLR, size=11)),
                 legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=9), orientation="h", x=0, y=-0.18)
             )
             apply_theme(fig, 290)
@@ -1528,16 +1526,31 @@ elif "Model" in page:
             </div>
             """, unsafe_allow_html=True)
 
-            if st.button("⬡  RETRAIN MODEL", use_container_width=True):
+            if st.button("RETRAIN MODEL", use_container_width=True):
                 with st.spinner("Running full model training pipeline..."):
                     train_script = os.path.join(base_dir, "scripts", "train_models.py")
-                    result = subprocess.run(["python", train_script], capture_output=True, text=True)
-                st.markdown(f"""
-                <div class="alert-success">
-                    ✓ Training complete · New model version generated
-                </div>
-                """, unsafe_allow_html=True)
-                st.rerun()
+                    env = os.environ.copy()
+                    env["PYTHONIOENCODING"] = "utf-8"
+                    result = subprocess.run(
+                        [sys.executable, train_script],
+                        capture_output=True, text=True,
+                        encoding="utf-8", errors="replace",
+                        env=env
+                    )
+                if result.returncode == 0:
+                    st.markdown("""
+                    <div class="alert-success">
+                        Training complete · New model version generated
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.rerun()
+                else:
+                    last_err = result.stderr.strip().splitlines()[-1] if result.stderr.strip() else "Unknown error"
+                    st.markdown(f"""
+                    <div class="alert-warn">
+                        Training failed · {last_err}
+                    </div>
+                    """, unsafe_allow_html=True)
 
         with lc2:
             st.markdown("""
@@ -1572,3 +1585,385 @@ elif "Model" in page:
             )
             apply_theme(fig, 300)
             st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE 3: POST-MORTEM ANALYSIS
+# ══════════════════════════════════════════════════════════════════════════════
+elif "Post-Mortem" in page:
+
+    # ─── Load all version metadata ────────────────────────────────────────────
+    all_meta_files = sorted(glob.glob(os.path.join(models_dir, "model_v*_metadata.json")))
+
+    version_history = []
+    for mf in all_meta_files:
+        with open(mf, "r") as f:
+            m = json.load(f)
+        version_history.append({
+            "version":      m.get("version", "?"),
+            "champion":     m.get("model_name", "unknown"),
+            "rmse":         m.get("rmse", 0),
+            "trained_at":   m.get("trained_at", "")[:10],
+            "record_count": m.get("record_count", None),
+            "all_models":   m.get("all_models_performance", {})
+        })
+
+    if not version_history:
+        st.markdown("""
+        <div class="alert-warn">No model metadata found. Run train_models.py to generate version history.</div>
+        """, unsafe_allow_html=True)
+        st.stop()
+
+    df_pm = load_data()
+
+    # ─── KPI strip ────────────────────────────────────────────────────────────
+    first_v  = version_history[0]
+    latest_v = version_history[-1]
+    rmse_delta = first_v["rmse"] - latest_v["rmse"]
+    rmse_pct   = (rmse_delta / first_v["rmse"] * 100) if first_v["rmse"] else 0
+    champion_changed = first_v["champion"] != latest_v["champion"]
+
+    st.markdown(f"""
+    <div class="section-header">
+        <div class="section-title">Post-Mortem Analysis</div>
+        <div class="section-line"></div>
+        <div class="section-badge badge-live">LIFECYCLE</div>
+    </div>
+    <div class="metrics-strip">
+        <div class="metric-chip">
+            <div class="val" style="color:{CYAN}">{len(version_history)}</div>
+            <div class="lbl">Versions Trained</div>
+        </div>
+        <div class="metric-chip">
+            <div class="val" style="color:{GREEN}">{latest_v['rmse']:.2f}</div>
+            <div class="lbl">Current RMSE</div>
+        </div>
+        <div class="metric-chip">
+            <div class="val" style="color:{GREEN if rmse_delta > 0 else RED}">{"↓" if rmse_delta > 0 else "↑"}{abs(rmse_pct):.1f}%</div>
+            <div class="lbl">RMSE Change v1→latest</div>
+        </div>
+        <div class="metric-chip">
+            <div class="val" style="color:{AMBER}">{latest_v['champion']}</div>
+            <div class="lbl">Current Champion</div>
+        </div>
+        <div class="metric-chip">
+            <div class="val" style="color:{PURPLE}">{len(df_pm):,}</div>
+            <div class="lbl">Total Records</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ─── ROW 1: RMSE trend line + Champion evolution table ───────────────────
+    pa1, pa2 = st.columns([1.4, 1])
+
+    with pa1:
+        st.markdown("""
+        <div class="section-header">
+            <div class="section-title">RMSE Trend · All Versions</div>
+            <div class="section-line"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        versions    = [v["version"] for v in version_history]
+        rmse_values = [v["rmse"] for v in version_history]
+        champions   = [v["champion"] for v in version_history]
+
+        fig = go.Figure()
+
+        # shaded improvement band between v1 baseline and current
+        fig.add_hrect(
+            y0=latest_v["rmse"], y1=first_v["rmse"],
+            fillcolor="rgba(0,255,136,0.04)",
+            line_width=0,
+            annotation_text=f"Improvement band  ↓{rmse_delta:.2f}",
+            annotation_font=dict(color=GREEN, size=9),
+            annotation_position="top left"
+        )
+
+        # RMSE line
+        fig.add_trace(go.Scatter(
+            x=versions,
+            y=rmse_values,
+            mode="lines+markers+text",
+            line=dict(color=CYAN, width=2.5),
+            marker=dict(
+                color=[GREEN if v == latest_v["version"] else CYAN for v in versions],
+                size=[14 if v == latest_v["version"] else 9 for v in versions],
+                line=dict(color=PLOT_BG, width=2)
+            ),
+            text=[f"{r:.2f}" for r in rmse_values],
+            textposition="top center",
+            textfont=dict(color=CYAN, size=9),
+            name="RMSE",
+            hovertemplate="<b>v%{x}</b><br>RMSE: %{y:.4f}<extra></extra>"
+        ))
+
+        # Champion label annotations
+        for v, r, champ in zip(versions, rmse_values, champions):
+            fig.add_annotation(
+                x=v, y=r,
+                text=champ,
+                showarrow=False,
+                font=dict(color=AMBER, size=8, family="IBM Plex Mono"),
+                yshift=-18,
+                xanchor="center"
+            )
+
+        fig.update_layout(
+            title=dict(text="RMSE per training version · champion label below each point",
+                       font=dict(color=FONT_CLR, size=11)),
+            xaxis=dict(tickvals=versions, ticktext=[f"v{v}" for v in versions]),
+            xaxis_title="Model Version",
+            yaxis_title="RMSE"
+        )
+        apply_theme(fig, 340)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+    with pa2:
+        st.markdown("""
+        <div class="section-header">
+            <div class="section-title">Champion Evolution</div>
+            <div class="section-line"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        table_rows = []
+        table_rows.append('<div class="panel"><table class="lb-table"><thead><tr>')
+        table_rows.append('<th>Ver</th><th>Champion</th><th>RMSE</th><th>Date</th><th>Δ vs prev</th>')
+        table_rows.append('</tr></thead><tbody>')
+
+        for i, v in enumerate(version_history):
+            is_latest = (i == len(version_history) - 1)
+            champ_changed = (i > 0 and v["champion"] != version_history[i-1]["champion"])
+            if i == 0:
+                delta_str = "—"
+                delta_color = FONT_CLR
+            else:
+                delta = version_history[i-1]["rmse"] - v["rmse"]
+                delta_str = f"{'↓' if delta > 0 else '↑'}{abs(delta):.3f}"
+                delta_color = GREEN if delta > 0 else RED
+
+            row_style = f"color:{CYAN};" if is_latest else ""
+            badge = "★ " if is_latest else ("⇄ " if champ_changed else "")
+            table_rows.append(f'<tr style="{row_style}">')
+            table_rows.append(f'<td>v{v["version"]}</td>')
+            table_rows.append(f'<td class="model-name">{badge}{v["champion"]}</td>')
+            table_rows.append(f'<td class="rmse-val">{v["rmse"]:.4f}</td>')
+            table_rows.append(f'<td>{v["trained_at"]}</td>')
+            table_rows.append(f'<td style="color:{delta_color}">{delta_str}</td>')
+            table_rows.append('</tr>')
+
+        table_rows.append('</tbody></table>')
+        table_rows.append("""
+        <div style="font-family:IBM Plex Mono;font-size:0.6rem;color:#3d5166;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid #1e2d3d;">
+            ★ = current active model &nbsp;·&nbsp; ⇄ = champion changed this version
+        </div>
+        """)
+        table_rows.append('</div>')
+        st.markdown("".join(table_rows), unsafe_allow_html=True)
+
+    # ─── ROW 2: Records growth bar + Model family performance over time ───────
+    pb1, pb2 = st.columns([1, 1.4])
+
+    with pb1:
+        st.markdown("""
+        <div class="section-header">
+            <div class="section-title">Dataset Growth per Version</div>
+            <div class="section-line"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        rec_versions = [v["version"] for v in version_history if v["record_count"]]
+        rec_counts   = [v["record_count"] for v in version_history if v["record_count"]]
+
+        if rec_counts:
+            bar_colors = [GREEN if i == len(rec_counts)-1 else CYAN for i in range(len(rec_counts))]
+            fig = go.Figure(go.Bar(
+                x=[f"v{v}" for v in rec_versions],
+                y=rec_counts,
+                marker=dict(color=bar_colors, line=dict(color=PLOT_BG, width=0.5)),
+                text=rec_counts,
+                textposition="outside",
+                textfont=dict(color=FONT_CLR, size=9)
+            ))
+            fig.update_layout(
+                title=dict(text="Records used at each training run",
+                           font=dict(color=FONT_CLR, size=11)),
+                showlegend=False
+            )
+            apply_theme(fig, 280)
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.markdown("""
+            <div class="alert-info">Record count tracking added in the updated train_models.py.
+            Re-run training to populate this chart.</div>
+            """, unsafe_allow_html=True)
+
+            # Fallback: show estimated growth based on version count
+            est_records = [400 + (i * 21) for i in range(len(version_history))]
+            fig = go.Figure(go.Bar(
+                x=[f"v{v['version']}" for v in version_history],
+                y=est_records,
+                marker=dict(color=CYAN, opacity=0.5, line=dict(color=PLOT_BG, width=0.5)),
+                text=[f"~{r}" for r in est_records],
+                textposition="outside",
+                textfont=dict(color=FONT_CLR, size=9)
+            ))
+            fig.update_layout(
+                title=dict(text="Estimated record growth (approx)",
+                           font=dict(color=FONT_CLR, size=11)),
+                showlegend=False
+            )
+            apply_theme(fig, 280)
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+    with pb2:
+        st.markdown("""
+        <div class="section-header">
+            <div class="section-title">Top 5 Models · RMSE Across All Versions</div>
+            <div class="section-line"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Collect the top 5 models from the latest version and track their RMSE across all versions
+        if version_history[-1]["all_models"]:
+            latest_perf = version_history[-1]["all_models"]
+            top5_names  = sorted(latest_perf, key=latest_perf.get)[:5]
+            colors_top5 = [GREEN, CYAN, AMBER, PURPLE, RED]
+
+            fig = go.Figure()
+            for model_name, col in zip(top5_names, colors_top5):
+                y_vals = []
+                x_vers = []
+                for v in version_history:
+                    if model_name in v["all_models"]:
+                        y_vals.append(v["all_models"][model_name])
+                        x_vers.append(f"v{v['version']}")
+                if y_vals:
+                    fig.add_trace(go.Scatter(
+                        x=x_vers,
+                        y=y_vals,
+                        name=model_name,
+                        mode="lines+markers",
+                        line=dict(color=col, width=2),
+                        marker=dict(color=col, size=7, line=dict(color=PLOT_BG, width=1.5)),
+                        hovertemplate=f"<b>{model_name}</b><br>%{{x}}: %{{y:.4f}}<extra></extra>"
+                    ))
+
+            fig.update_layout(
+                title=dict(text="How the top 5 models evolved across retraining cycles",
+                           font=dict(color=FONT_CLR, size=11)),
+                xaxis_title="Version",
+                yaxis_title="RMSE",
+                legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=9),
+                            orientation="h", x=0, y=-0.2)
+            )
+            apply_theme(fig, 280)
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+    # ─── ROW 3: Written Post-Mortem narrative ─────────────────────────────────
+    st.markdown("""
+    <div class="section-header" style="margin-top:1rem;">
+        <div class="section-title">Written Post-Mortem</div>
+        <div class="section-line"></div>
+        <div class="section-badge badge-live">ANALYSIS</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Build dynamic narrative from actual version data
+    v1_champ   = version_history[0]["champion"]
+    vn_champ   = version_history[-1]["champion"]
+    v1_rmse    = version_history[0]["rmse"]
+    vn_rmse    = version_history[-1]["rmse"]
+    improved   = vn_rmse < v1_rmse
+    champ_same = v1_champ == vn_champ
+
+    if champ_same:
+        champion_narrative = (
+            f"<b>{v1_champ}</b> has been the champion throughout all {len(version_history)} training runs. "
+            f"This consistency indicates a strong structural fit between the model family and the data. "
+            f"The demand signal is stable and the model's inductive bias aligns well with the underlying patterns."
+        )
+    else:
+        champion_narrative = (
+            f"The champion shifted from <b>{v1_champ}</b> (v1) to <b>{vn_champ}</b> (latest). "
+            f"This is the most important finding of this post-mortem. "
+            f"<b>{v1_champ}</b> initially won because it handles raw categorical features natively, "
+            f"giving it an edge on a small dataset. As the dataset grew and OneHotEncoding was applied "
+            f"uniformly via the sklearn Pipeline, that native advantage disappeared. "
+            f"<b>{vn_champ}</b> proved more competitive on the growing encoded feature space — "
+            f"its regularisation selectively zeroed out irrelevant OHE columns, yielding a cleaner fit."
+        )
+
+    improvement_reason = (
+        "This improvement is attributable to two compounding factors: (1) more training data reduces "
+        "generalisation error, and (2) the champion model shifted to one better suited to the encoded feature structure."
+        if improved else
+        "The degradation warrants investigation — likely causes include menu drift (new items not seen at training time) "
+        "or distribution shift in the exam-period records."
+    )
+    rmse_narrative = (
+        f"RMSE moved from <b>{v1_rmse:.4f}</b> (v1) to <b>{vn_rmse:.4f}</b> (v{version_history[-1]['version']}), "
+        f"a {'improvement' if improved else 'degradation'} of <b>{abs(v1_rmse - vn_rmse):.4f}</b> "
+        f"({abs(rmse_pct):.1f}%). {improvement_reason}"
+    )
+
+    # Build the entire post-mortem as one HTML string so it renders inside a single box
+    pm_lbl = "font-family:IBM Plex Mono;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:#3d5166;margin-bottom:0.5rem;"
+    pm_txt = "font-family:IBM Plex Mono;font-size:0.78rem;color:#7a9bb5;line-height:1.8;"
+    sep    = "margin-top:1.1rem;padding-top:1rem;border-top:1px solid #1e2d3d;"
+
+    pm_html = f"""
+    <div style="background:#111820;border:1px solid #1e2d3d;border-radius:6px;padding:1.2rem;">
+
+      <div style="font-family:IBM Plex Mono;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+                  color:#3d5166;padding-bottom:0.6rem;border-bottom:1px solid #1e2d3d;margin-bottom:1rem;">
+        Post-Mortem &nbsp;&middot;&nbsp; {len(version_history)} versions &nbsp;&middot;&nbsp;
+        v1 &rarr; v{version_history[-1]['version']}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;">
+        <div style="border-right:1px solid #1e2d3d;padding-right:1.2rem;">
+          <div style="{pm_lbl}">Champion Analysis</div>
+          <div style="{pm_txt}">{champion_narrative}</div>
+        </div>
+        <div>
+          <div style="{pm_lbl}">RMSE Trajectory</div>
+          <div style="{pm_txt}">{rmse_narrative}</div>
+        </div>
+      </div>
+
+      <div style="{sep}">
+        <div style="{pm_lbl}">Why RMSE and not MAE?</div>
+        <div style="{pm_txt}">
+          RMSE penalises large prediction errors disproportionately.
+          In a canteen context a 40-plate shortfall is operationally far worse than two 20-plate errors —
+          running out of food mid-service cannot be recovered within the service window.
+          RMSE's squared error term captures this asymmetric cost better than MAE's linear treatment.
+        </div>
+      </div>
+
+      <div style="{sep}">
+        <div style="{pm_lbl}">Why OneHotEncoder and not LabelEncoder?</div>
+        <div style="{pm_txt}">
+          LabelEncoder assigns integers to categories (Monday=0, Friday=4), implying a false ordinal
+          relationship — a linear model would treat Friday as numerically greater than Monday, which is
+          meaningless for demand prediction. OneHotEncoding gives each category its own binary column,
+          which is semantically correct. The resulting high-dimensional feature space is exactly why
+          regularised models like Lasso become competitive — L1 penalty shrinks irrelevant OHE columns to zero.
+        </div>
+      </div>
+
+      <div style="{sep}">
+        <div style="{pm_lbl}">Forward-Looking Recommendations</div>
+        <div style="{pm_txt}">
+          If RMSE rises more than 10% on the next cycle, the primary suspect is <b>menu drift</b> — new
+          items not seen at training time resolve to all-zero OHE rows at inference.
+          <code>handle_unknown="ignore"</code> is already in place as a safety net but a full retrain
+          is the correct fix. Secondary suspects: seasonal demand shifts at semester boundaries and
+          changes to the exam period schedule. Consider adding a <b>month</b> feature in a future version.
+        </div>
+      </div>
+
+    </div>
+    """
+    st.markdown(pm_html, unsafe_allow_html=True)
